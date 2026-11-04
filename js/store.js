@@ -21,7 +21,7 @@ export class SupabaseStore extends BaseStore {
   constructor(cfg) { super(); this.cfg = cfg; this.mode = 'live'; this.session = null; this.profile = null; this._load(); }
   _load() { try { this.session = JSON.parse(localStorage.getItem('crm_session') || 'null'); } catch { this.session = null; } }
   _save() { try { this.session ? localStorage.setItem('crm_session', JSON.stringify(this.session)) : localStorage.removeItem('crm_session'); } catch {} }
-  get base() { return this.cfg.supabaseUrl.replace(/\/$/, ''); }
+  get base() { try { return new URL(String(this.cfg.supabaseUrl).trim()).origin; } catch { throw new Error('config.js: supabaseUrl is not a valid web address. It must look like https://abcdxyz.supabase.co'); } }
   async _fetch(path, opt = {}, retry = true) {
     const headers = { apikey: this.cfg.supabaseAnonKey, 'Content-Type': 'application/json', ...(opt.headers || {}) };
     headers.Authorization = 'Bearer ' + (this.session?.access_token || this.cfg.supabaseAnonKey);
